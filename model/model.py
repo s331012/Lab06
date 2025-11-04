@@ -31,12 +31,30 @@ class Autonoleggio:
         self._responsabile = responsabile
 
     def get_automobili(self) -> list[Automobile] | None:
-        """
-            Funzione che legge tutte le automobili nel database
-            :return: una lista con tutte le automobili presenti oppure None
-        """
+            #Funzione che legge tutte le automobili nel database
+            #:return: una lista con tutte le automobili presenti oppure None
+        query = """
+                SELECT *
+                FROM automobile \
+                """
 
-        # TODO
+        conn = get_connection()
+        if conn is None:
+            return None
+
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query)
+
+            risultato = cursor.fetchall()
+            cursor.close()
+            conn.close()
+
+            if not risultato:
+                return None
+
+            automobili = []
+            for row in risultato:
 
     def cerca_automobili_per_modello(self, modello) -> list[Automobile] | None:
         """
@@ -44,4 +62,30 @@ class Autonoleggio:
             :param modello: il modello dell'automobile
             :return: una lista con tutte le automobili di marca e modello indicato oppure None
         """
-        # TODO
+        query = """
+                SELECT *
+                FROM automobile
+                WHERE modello = %s 
+                """
+        conn = get_connection()
+        if conn is None:
+            return None
+
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, (modello,))
+            risultato = cursor.fetchall()
+            cursor.close()
+            conn.close()
+
+            if not risultato:
+                return None
+
+            automobili = []
+            for row in risultato:
+                automobili.append(Automobile(*row))
+            return automobili
+
+        except mysql.connector.Error as err:
+            print(f"Errore durante l'accesso al database {err}")
+            return None
